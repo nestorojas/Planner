@@ -1,0 +1,44 @@
+﻿@model IEnumerable<Workflow> 
+
+@{
+    ViewData["Title"] = "Workflow List";
+}
+<style>
+    .icon{
+        color: darkgrey;
+        border: 1px solid darkgrey;
+        border-radius: 4px;
+    }
+</style>
+<div class="container">
+    <div class="row">
+        <h2>Workflow List</h2>
+        <div class="mb-3" style="text-align:right">
+            <a href="@Url.Action("Create", "Workflow")" class="btn btn-outline-primary">Create New Workflow</a>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width: 15%;">Id</th>
+                    <th style="width: 30%;">Name</th>
+                    <th style="width: 40%;">Description</th>
+                    <th style="width: 15%;text-align:center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var workflow in Model)
+                {
+                    <tr>
+                        <td>@workflow.Id</td>
+                        <td>@workflow.Name</td>
+                        <td>@workflow.Description</td>
+                        <td style="text-align:center">
+                            <a class="icon" title="Edit" asp-controller="Workflow" asp-action="Details" asp-route-id="@workflow.Id"><i class="bi bi-pencil-fill"></i></a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>

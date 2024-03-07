@@ -1,0 +1,175 @@
+﻿@using planner.ViewModel
+@model ProfileVM
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="row d-flex align-items-center justify-content-center">
+    <div class="col-md-4 card p-3">
+        <h2 class="text-center text-info">Profile</h2>
+        <form method="post">
+            <input type="hidden" asp-for="TeamId" />
+            @if (ViewBag.ModelError != "")
+            {
+                <div class="text-danger">@ViewBag.ModelError</div>
+            }
+
+            <div class="mb-1">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" readonly/>
+            </div>
+            <div class="mb-1">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" readonly />
+            </div>
+            <div class="mb-1">
+                @if (Model.TeamAccess != null && Model.TeamAccess.Count > 0)
+                {
+                    <table class="table table-responsive-sm">
+                        <thead>
+                            <tr>
+                                <th>Email Requestor</th>
+                                <th>Approve</th>
+                                <th>Reject</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var request in Model.TeamAccess)
+                            {
+                                <tr>
+                                    <td>@request.UserRequestorEmail</td>
+                                    <td><a href="#" class="approve-link" data-request-id="@request.Id"><i class="bi bi-check-circle-fill text-success"></i></a></td>
+                                    <td><a href="#" class="reject-link" data-request-id="@request.Id"><i class="bi bi-x-circle-fill text-danger"></i></a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+            </div>
+            @if(Model.TeamId != 0)
+            {
+                <div class="mb-1">
+                    <label asp-for="TeamName" class="control-label"></label>
+                    <input asp-for="TeamName" class="form-control" readonly />
+                </div>
+                if (Model.IsTeamOwner && Model.TeamMembers != null && Model.TeamMembers.Count > 0)
+                {
+                    <div class="mb-1">
+                        <table class="table table-responsive">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Name</th>
+                                    <th>Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var team in Model.TeamMembers)
+                                {
+                                    <tr>
+                                        <td>@team.Email</td>
+                                        <td>@team.Name</td>
+                                        <td><a href="#" class="remove-link" data-request-id="@team.Email"><i class="bi bi-x-circle-fill text-danger"></i></a></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                    </div>
+                }
+                else
+                {
+                    if (!Model.IsTeamOwner)
+                    {
+                        <div class="row text-center">
+                            <div class="col-sm-4"></div>
+                            <div class="col-4">
+                                <input type="submit" id="exitTeam" asp-action="ExitTeam" value="Exit Team" class="btn btn-primary btn-sm float-end" />
+                            </div>
+                        </div>
+                    }
+                }
+
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(Model.TeamRequestAccess))
+                {
+                    <div class="mb-1">
+                        <label asp-for="TeamRequestAccess" class="control-label"></label>
+                        <input asp-for="TeamRequestAccess" class="form-control" readonly />
+                    </div>
+                }
+                else
+                {
+                    <div class="mb-1 form-check">
+                        <label class="form-check-label">
+                            <input asp-for="CreateTeam" class="form-check-input" /> @Html.DisplayNameFor(a => a.CreateTeam)
+                        </label>
+                    </div>
+                    <div class="mb-1" id="addTeam" style="display:none">
+                        <label asp-for="TeamName" class="control-label">Team Name</label>
+                        <input asp-for="TeamName" class="form-control" />
+                    </div>
+                    <div class="mb-1" id="accessTeam">
+                        <label asp-for="TeamOwnerEmail" class="control-label">Request Access: Provide Team Admin Email</label>
+                        <input asp-for="TeamOwnerEmail" class="form-control" />
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-sm-4"></div>
+                        <div class="col-4">
+                            <input type="submit" id="requestTeam" asp-action="RequestAccess" value="Request Access" class="btn btn-primary btn-sm float-end" />
+                        </div>
+                    </div>
+                }
+            }
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var createTeamCheckbox = document.getElementById('CreateTeam');
+            var teamOwnerEmailInput = document.getElementById('TeamOwnerEmail');
+            var TeamName = document.getElementById('TeamName');
+            if (createTeamCheckbox && teamOwnerEmailInput && TeamName) {
+                createTeamCheckbox.addEventListener('change', function () {
+                    if (createTeamCheckbox.checked) {
+                        TeamName.setAttribute('required', 'required');
+                        document.getElementById("accessTeam").style.display = 'none';
+                        document.getElementById("addTeam").style.display = 'block';
+                        document.querySelector('#requestTeam').value = 'Create Team';
+                    } else {
+                        teamOwnerEmailInput.setAttribute('required', 'required');
+                        document.getElementById("accessTeam").style.display = 'block';
+                        document.getElementById("addTeam").style.display = 'none';
+                        document.querySelector('#requestTeam').value = 'Request Access';
+                    }
+                });
+            }
+        });
+
+        $(document).ready(function () {
+            $(".approve-link").click(function (e) {
+                e.preventDefault();
+                var requestId = $(this).data("request-id");
+                $.post("/Account/AcceptTeamMemberRequest", { requestId: requestId }).done(function () { location.reload(); });
+            });
+
+            $(".reject-link").click(function (e) {
+                e.preventDefault();
+                var requestId = $(this).data("request-id");
+                $.post("/Account/RejectTeamMemberRequest", { requestId: requestId }).done(function () { location.reload(); });
+            });
+
+            $(".remove-link").click(function (e) {
+                e.preventDefault();
+                var email = $(this).data("request-id");
+                $.post("/Account/RemoveTeamMemberRequest", { email: email }).done(function () { location.reload(); });
+            });
+        });
+    </script>
+}

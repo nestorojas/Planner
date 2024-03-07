@@ -1,0 +1,91 @@
+﻿@using planner.ViewModel
+@model ProjectVM
+@{
+    ViewData["Title"] = "My Project Hub Create";
+}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10 centralContainer">
+            <form asp-action="CreateProject" method="post" class="needs-validation">
+                <input type="hidden" asp-for="ClientId" name="ClientId" />
+                <input type="hidden" asp-for="TeamId" name="ClientId" />
+                <div class="form-group p-2 text-center">
+                    <h3>PROJECT</h3>
+                </div>
+
+                <div class="form-group p-2">
+                    <label asp-for="ProjectName" class="form-label">Project Name</label>
+                    <input asp-for="ProjectName" class="form-control" required />
+                    <span asp-validation-for="ProjectName" class="text-danger"></span>
+                </div>
+                <div class="form-group p-2">
+                    <label asp-for="ProjectDescription" class="form-label">Project Description</label>
+                    <textarea asp-for="ProjectDescription" class="form-control"></textarea>
+                    <span asp-validation-for="ProjectDescription" class="text-danger"></span>
+                </div>
+                <div class="form-group p-2">
+                    <label for="ClientName" class="form-label">Client</label>
+                    <input asp-for="ClientName" class="form-control" />
+                    <span asp-validation-for="ClientName" class="text-danger"></span>
+                </div>
+                <div class="form-group p-2">
+                    <label asp-for="WorkflowId" class="form-label">Workflow</label>
+                    <select asp-for="WorkflowId" class="form-control" required>
+                        <option value="">Select Workflow</option>
+                        @foreach (var workflow in Model.Workflows)
+                        {
+                            <option value="@workflow.Id">@workflow.Name</option>
+                        }
+                    </select>
+                    <span asp-validation-for="WorkflowId" class="text-danger"></span>
+                </div>
+                <div class="form-group p-2">
+                    <label class="form-check-label">
+                        <input type="checkbox" asp-for="IsStartProject" class="form-check-input">
+                        Start Project?
+                    </label>
+                </div>
+                <div class="form-group p-2 text-center">
+                    <button type="submit" class="btn btn-primary">Create Project</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-sm-1"></div>
+    </div>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(function () {
+            var selected = "";
+            $("#ClientName").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "/Project/GetClientNames",
+                        dataType: "json",
+                        data: { term: request.term },
+                        success: function (data) {
+                            response(data.map(function (item) {
+                                return { label: item.clientName, value: item.clientId };
+                            }));
+                        }
+                    });
+                },
+                minLength: 3,
+                select: function (event, ui) {
+                    selected = ui.item.label;
+                    $("#ClientId").val(ui.item.value);
+                },
+                // New option
+                close: function (event, ui) {
+                    $("#ClientName").val(selected);
+                }
+            });
+        });
+    </script>
+}

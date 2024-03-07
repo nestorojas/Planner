@@ -1,0 +1,208 @@
+﻿@model Workflow
+
+@{
+    ViewData["Title"] = "Create Workflow";
+}
+<style>
+    #workflowform #workflowtask {
+        border: 1px solid black;
+        padding: 20px;
+        border-radius: 10px
+    }
+</style>
+<div class="container" id="sectionworkflow">
+    <form id="workflowform" asp-action="Create" class="text-center">
+        <div class="row pb-2">
+            <div class="col-sm-3" style="text-align:left">
+                <h3>Workflow</h3>
+            </div>
+        </div>
+        <div class="row pb-2">
+            <div class="col-sm-3">
+                <input type="hidden" asp-for="Id" />
+                <span id="workflowId"></span>
+            </div>
+        </div>
+        <div class="row pb-2">
+            <div class="col-sm-2" style="text-align:left">
+                <label for="Name">Name:</label>
+            </div>
+            <div class="col-sm-8">
+                <input class="form-control" asp-for="Name" />
+            </div>
+        </div>
+        <div class="row pb-2">
+            <div class="col-sm-2" style="text-align:left">
+                <label for="Description">Description:</label>
+            </div>
+            <div class="col-sm-8">
+                <textarea class="form-control" rows="5" asp-for="Description"></textarea>
+            </div>
+        </div>
+        <button type="button" id="createWorkflowButton" class="btn btn-primary">Create Workflow</button>
+    </form>
+</div>
+<div class="container" id="sectiontask" style="display:none">
+    <form id="workflowtask" asp-action="CreateTaskForWorkflow" class="text-center">
+        <div class="row pb-2">
+            <div class="col-sm-3" style="text-align:left">
+                <h3>Task</h3>
+            </div>
+        </div>
+        <div class="row pb-2">
+            <div class="col-sm-2" style="text-align:left">
+                <label for="TaskName">Name:</label>
+            </div>
+            <div class="col-sm-8">
+                <input class="form-control" id="TaskName" />
+            </div>
+        </div>
+        <div class="row pb-2">
+            <div class="col-sm-2" style="text-align:left">
+                <label for="Name">Predecesors:</label>
+            </div>
+            <div class="col-sm-8" style="text-align:left">
+                <select class="form-control" id="predecesors"><option>No Tasks available for predecessor</option></select>
+            </div>
+        </div>
+        <button type="button" id="createTaskButton" class="btn btn-primary">Create Task</button>
+    </form>
+    <table id="taskTable" class="table">
+        <thead>
+            <tr>
+                <th style="width: 15%;">Id</th>
+                <th style="width: 30%;">Name</th>
+                <th style="width: 40%;">Predecessors</th>
+                <th style="width: 15%;text-align:center">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Table rows will be dynamically populated here -->
+        </tbody>
+    </table>
+
+</div>
+
+@section Scripts {
+    <script>
+        var wfdata = {
+            Id : 0,
+            Name : "",
+            Description : ""
+        }
+        $(document).ready(function () {
+            if ($("#Id").val() != "0") {
+                getTasksAndPopulateTable($("#Id").val());
+            }
+
+            $("#createTaskButton").click(function (e) {
+                e.preventDefault();
+                var def = new Array()
+                var selectedPredecessors = $("#predecesors").val() == "No Tasks available for predecessor" ? def : $("#predecesors").val();
+                var predecessors = selectedPredecessors.join(", ");
+                var taskName = $("#TaskName").val();
+                createTaskForWorkflow(taskName, predecessors);
+            });
+
+            $("#createWorkflowButton").click(function () {
+                getwfdata();
+                if (wfdata.Name != "" && wfdata.Description != "") {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Workflow/Create",
+                        data: {
+                            Id: wfdata.Id,
+                            Name: wfdata.Name,
+                            Description: wfdata.Description
+                        },
+                        success: function (response) {
+                            $("#sectiontask").show(function () {
+                                alert("Workflow updated");
+                                getTasksAndPopulateTable(response.id);
+                            });
+                        },
+                        error: function () {
+                            console.log("Failed to create workflow.");
+                        }
+                    });
+                }
+                else {
+                    alert("Name and Description required");
+                }
+            });
+        });
+
+        function getTasksAndPopulateTable(workflowId) {
+            $("#workflowId").text(workflowId);
+            $("#Id").val(workflowId);
+            $("#sectiontask").show()
+            $("#createWorkflowButton").text("Update Workflow");            
+            $.ajax({
+                type: "GET",
+                url: "/Workflow/GetTasks",
+                data: { id: workflowId },
+                success: function (response) {
+                    $("#taskTable tbody").empty();
+                    if (response.length > 0) {
+                        $.each(response, function (index, task) {
+                            var row = "<tr>" +
+                                "<td>" + task.id + "</td>" +
+                                "<td>" + task.name + "</td>" +
+                                "<td>" + (task.predecessorId ? task.predecessorId.join(", ") : "") + "</td>" +
+                                "<td style='text-align:center'>" +
+                                "<a class='icon' title='Edit' href='/Task/Details/" + task.id + "'><i class='bi bi-pencil-fill'></i></a>" +
+                                "</td>" +
+                                "</tr>";
+                            $("#taskTable tbody").append(row);
+                        });
+                        populatePredecessorsSelect(response);
+                    } else {
+                        $("#taskTable tbody").append("<tr><td colspan='4'>No tasks found</td></tr>");
+                    }
+                },
+                error: function () {
+                    alert("Failed to retrieve tasks.");
+                }
+            });
+        }
+
+        function populatePredecessorsSelect(tasks) {
+            var select = $("#predecesors");
+            if (tasks.length > 0) {
+                select.empty();
+                select.append("<option disabled selected>Select predecessor</option>");
+                $.each(tasks, function (index, task) {
+                    select.append("<option value='" + task.id + "'>" + task.name + "</option>");
+                });
+            } else {
+                select.append("<option>No Tasks available for predecessor</option>");
+            }
+            select.attr("multiple", "multiple");
+        }
+
+        function createTaskForWorkflow(taskName, predecessors) {
+            $.ajax({
+                type: "POST",
+                url: "/Workflow/CreateTaskForWorkflow",
+                data: {
+                    Name: taskName,
+                    predecessors: predecessors,
+                    workflowId: $("#Id").val()
+                },
+                success: function (response) {
+                    $("#TaskName").val("");
+                    if(response) getTasksAndPopulateTable($("#Id").val());
+                },
+                error: function (e) {
+                    alert("Failed to create task for workflow.");
+                }
+            });
+        }
+
+        function getwfdata(){
+            wfdata.Id = $("#Id").val() != "" ? $("#Id").val(): "0";
+            wfdata.Name = $("#Name").val();
+            wfdata.Description = $("#Description").val();
+        }
+    </script>
+}

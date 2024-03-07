@@ -1,0 +1,45 @@
+﻿@using planner.ViewModel
+@model IEnumerable<ProjectVM>
+@{
+    ViewData["Title"] = "My Project Hub";
+    List<object> columnCommands = new List<object>();
+    columnCommands.Add(new { type = "Edit", buttonOption = new { content = "", cssClass = "e-icons e-edit" } });
+    columnCommands.Add(new { type = "Details", buttonOption = new { content = "", cssClass = "e-icons e-search" } });
+    List<object> toolbarItems = new List<object>();
+    toolbarItems.Add(new { text = "Create Project", tooltipText = "Create Project", prefixIcon = "e-expand" });
+}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <ejs-grid id="Grid" dataSource="@Model" toolbarclick="onToolBarClick" commandClick="commandClick" 
+            toolbar="toolbarItems" allowPaging="true" allowSorting="true" allowFiltering="true" allowGrouping="true" height="100%">
+                <e-grid-editSettings allowAdding="true" mode="Batch"></e-grid-editSettings>
+                <e-grid-pageSettings pageSize="10"></e-grid-pageSettings>
+                <e-grid-columns>
+                    <e-grid-column headerText="Action" width="100" commands="columnCommands"></e-grid-column>
+                    <e-grid-column field="ProjectId" headerText="Id" textAlign="Center" width="70"></e-grid-column>
+                    <e-grid-column field="ProjectName" headerText="Name" textAlign="Left" width="220"></e-grid-column>
+                    <e-grid-column field="ProjectDescription" headerText="Description" textAlign="Left" width="320"></e-grid-column>
+                    <e-grid-column field="ClientName" headerText="Client" textAlign="Left" width="220"></e-grid-column>
+                    <e-grid-column field="ProjectStatus" headerText="Status" textAlign="Center" width="150"></e-grid-column>
+                    <e-grid-column field="WorkflowName" headerText="Category" textAlign="Center" width="150"></e-grid-column>
+                </e-grid-columns>
+            </ejs-grid>
+        </div>
+    </div>
+</div>
+<script>
+
+    function commandClick(e) {
+        if (e.commandColumn.type == 'Edit') {
+            window.location.href = '@Url.Action("ProjectEdit", "Project")/' + e.rowData.ProjectId;
+        }
+        if (e.commandColumn.type == 'Details'){
+            window.location.href = '@Url.Action("ProjectDetail", "Project")/' + e.rowData.ProjectId;
+        }
+    }
+    function onToolBarClick(e) {
+        e.originalEvent.defaultPrevented = true
+        window.location.href = '@Url.Action("CreateProject", "Project")';
+    }
+</script>

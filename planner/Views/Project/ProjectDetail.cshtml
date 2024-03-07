@@ -1,0 +1,41 @@
+﻿@using planner.ViewModel
+@model ProjectVM
+@{
+    ViewData["Title"] = "My Project Hub Detail";
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10 centralContainer">
+            <div class="container">
+                <div class="row p-2 text-center">
+                    <h3>PROJECT DETAIL</h3>
+                </div>
+                <div class="row p-2">
+                    <div class="col-sm-3"><label asp-for="ProjectStatus" class="control-label"></label></div>
+                    <div class="col-sm-3">@Model.ProjectStatus</div>
+                    <div class="col-sm-3"><label asp-for="ProjectId" class="control-label"></label></div>
+                    <div class="col-sm-3">@Model.ProjectId</div>
+                </div>
+                <div class="row p-2">
+                    <div class="col-sm-3"><label asp-for="ProjectName" class="control-label"></label></div>
+                    <div class="col-sm-9"><input asp-for="ProjectName" disabled class="form-control form-control-sm"/></div>
+                </div>
+                <div class="row p-2">
+                    <div class="col-sm-3"><label asp-for="ProjectDescription" class="control-label"></label></div>
+                    <div class="col-sm-9"><textarea asp-for="ProjectDescription" class="form-control form-control-sm" disabled></textarea></div>
+                </div>
+                <div class="row p-2">
+                    <div class="col-sm-3"><label asp-for="ClientName" class="control-label"></label></div>
+                    <div class="col-sm-9"><input asp-for="ClientName" class="form-control form-control-sm" disabled /></div>
+                </div>
+                <div class="row p-2">
+                    <div class="col-sm-3"><label asp-for="WorkflowName" class="control-label"></label></div>
+                    <div class="col-sm-9"><input asp-for="WorkflowName" class="form-control form-control-sm" disabled /></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-1"></div>
+    </div>
+</div>
