@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using planner.Migrations;
 using planner.Services;
 using planner.ViewModel;
 using Syncfusion.EJ2.Base;
@@ -41,7 +42,7 @@ namespace planner.Controllers
             var currentUser = await userManager.GetUserAsync(user);
             return _planner.GetProjects(currentUser!.Email, currentUser.TeamId);
         }
-        public async Task<IActionResult> ProjectEdit(int id)
+        public IActionResult ProjectEdit(int id)
         {
             var p = _planner.GetProjectById(id);
             var model = new ProjectVM
@@ -58,7 +59,32 @@ namespace planner.Controllers
             };
             return View(model);
         }
-        public async Task<IActionResult> ProjectDetail(int id)
+        [HttpPost]
+        public IActionResult ProjectEdit(ProjectVM model)
+        {
+            if (ModelState.IsValid)
+            {
+                Project project = _planner.GetProjectById(model.ProjectId);
+                project.Name = model.ProjectName!;
+                project.Description = model.ProjectDescription!;
+                project.ProjectStatusId = model.IsStartProject ? 3 : 2;
+
+                var result = _planner.UpdateProject(project);
+                if (result)
+                {
+                    if (project.ProjectStatusId >= 3 && project.ProjectStatusId != 5)
+                    {
+                        _planner.ExecuteWorkFlow(project.Id);
+                    }
+                    return RedirectToAction("Project");
+                }
+
+                ModelState.AddModelError("ErrorModel", "System is busy, Project cannot be created, try again!");
+                return View(model);
+            }
+            return View(model);
+        }
+        public IActionResult ProjectDetail(int id)
         {
             var p = _planner.GetProjectById(id);
             var model = new ProjectVM
@@ -71,11 +97,12 @@ namespace planner.Controllers
                 ProjectStatusId = p.ProjectStatusId,
                 ProjectStatus = _planner.GetProjectStatusById(p.ProjectStatusId).ProjectStatusName,
                 WorkflowId = p.WorkflowId,
-                WorkflowName = _planner.GetWorkflowById(p.WorkflowId).Name
+                WorkflowName = _planner.GetWorkflowById(p.WorkflowId).Name,
+                Tasks = _planner.GetTaskByProjectId(p.Id),
             };
             return View(model);
         }
-        public async Task<IActionResult> CreateProject()
+        public async Task<IActionResult> ProjectCreate()
         {
             var model = new ProjectVM
             {
@@ -85,7 +112,7 @@ namespace planner.Controllers
             return View(model);
         }
         [HttpPost]
-        public async Task<IActionResult> CreateProject(ProjectVM model)
+        public async Task<IActionResult> ProjectCreate(ProjectVM model)
         {
             if (ModelState.IsValid)
             {
@@ -114,7 +141,7 @@ namespace planner.Controllers
                     return RedirectToAction("Project");
                 }
 
-                ModelState.AddModelError("", "Project cannot be created");
+                ModelState.AddModelError("ErrorModel", "System is busy, Project cannot be created, try again!");
                 return View(model);
             }
             return View(model);
@@ -128,7 +155,6 @@ namespace planner.Controllers
         [HttpGet]
         public IActionResult GetClientNames(string term)
         {
-            // Fetch client names from your database based on the search term
             var clientNames = _planner.GetClient(term, 0);
 
             return Json(clientNames.Select(x => new { x.ClientId, x.ClientName }));

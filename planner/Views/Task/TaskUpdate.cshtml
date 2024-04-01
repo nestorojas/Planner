@@ -1,0 +1,90 @@
+﻿@model planner.ViewModel.TaskVM
+@{
+    ViewData["Title"] = "Update Task";
+}
+<div class="container">
+    <div class="row centralContainer p-2 m-2">
+        <div class="col-sm-12">
+            <form asp-action="" class="text-center">
+                <input type="hidden" asp-for="TaskId" />
+                <div class="row pb-2">
+                    <div class="col-sm-3" style="text-align:left">
+                        <h3>EDIT TASK</h3>
+                    </div>
+                </div>
+                <div class="row pb-2">
+                    <div class="col-sm-2" style="text-align:left">
+                        <label asp-for="ProjectId" class="control-label">Project Id</label>
+                    </div>
+                    <div class="col-sm-3">
+                        <input asp-for="ProjectId" readonly class="form-control form-control-sm" />
+                    </div>
+                </div>
+                <div class="row pb-2">
+                    <div class="col-sm-2" style="text-align:left">
+                        <label asp-for="ProjectName" class="control-label">Project Name</label>
+                    </div>
+                    <div class="col-sm-9"><input asp-for="ProjectName" readonly class="form-control form-control-sm" /></div>
+                </div>
+                <div class="row pb-2">
+                    <div class="col-sm-2" style="text-align:left">
+                        <label for="TaskName" class="control-label">Task Name:</label>
+                    </div>
+                    <div class="col-sm-9">
+                        <input class="form-control form-control-sm" asp-for="Name" readonly/>
+                    </div>
+                </div>
+                <div class="row pb-2">
+                    <div class="col-sm-2" style="text-align:left">
+                        <label for="Description" class="control-label">Description:</label>
+                    </div>
+                    <div class="col-sm-9">
+                        <textarea class="form-control form-control-sm" rows="5" asp-for="Description" readonly></textarea>
+                    </div>
+                </div>
+                <div class="row pb-2">
+                    <div class="col-sm-2" style="text-align:left">
+                        <label for="Name" class="control-label">Assigned:</label>
+                    </div>
+                    <div class="col-sm-4" style="text-align:left">
+                        <input asp-for="AssignedUserName" readonly class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-sm-2" style="text-align:left">
+                        <label for="DueDate" class="control-label">Due Date:</label>
+                    </div>
+                    <div class="col-sm-3" style="text-align:left">
+                        <ejs-datepicker id="DueDate" value="@Model.DueDate" min="@DateTime.Today"></ejs-datepicker>
+                    </div>
+                </div>
+                <div class="row pb-2">
+                    <div class="col-sm-2" style="text-align:left">
+                        <label for="Name" class="control-label">Note:</label>
+                    </div>
+                    <div class="col-sm-9" style="text-align:left">
+                        <textarea class="form-control form-control-sm" rows="5" asp-for="Note"></textarea>
+                        <span asp-validation-for="Note" class="text-danger"></span>
+                    </div>
+                </div>
+                <button type="submit" asp-action="TaskUpdate" asp-route-Mode="Complete" class="btn btn-danger">Complete</button>
+                <button type="submit" asp-action="TaskUpdate" asp-route-Mode="Update" class="btn btn-primary">Update</button>
+            </form>
+        </div>
+    </div>
+    <div class="row centralContainer p-2 m-2">
+        <div class="col-sm-12">
+            <table id="taskTable" class="table">
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">Id</th>
+                        <th style="width: 30%;">Name</th>
+                        <th style="width: 40%;">Predecessors</th>
+                        <th style="width: 15%;text-align:center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Table rows will be dynamically populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

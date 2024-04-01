@@ -29,6 +29,7 @@ namespace planner
 
         [StringLength(100)]
         public string? Email2 { get; set; }
+        public bool IsActive { get; set; }
     }
 
 }

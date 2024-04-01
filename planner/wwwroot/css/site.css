@@ -23,9 +23,12 @@ body {
 .centralContainer {
     border: 1px solid darkgrey;
     border-radius: 5px;
-    margin: 30px;
-    padding: 30px;
-    /* 3D effects */
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     transform: translateZ(5px);
+}
+.e-inactivecolor{
+    color : red;
+}
+.e-activecolor{
+    color : green;
 }

@@ -1,0 +1,39 @@
+﻿@model IEnumerable<planner.Client>
+@{
+    List<object> columnCommands = new List<object>();
+    columnCommands.Add(new { type = "Edit", buttonOption = new { content = "", cssClass = "e-icons e-edit" } });
+    List<object> toolbarItems = new List<object>();
+    toolbarItems.Add(new { text = "Create Task", tooltipText = "Create Task", prefixIcon = "e-expand" });
+}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-12">
+            <ejs-grid id="Grid" dataSource="@Model" toolbarclick="onTaskToolBarClick" commandClick="onTaskCommandClick"
+                      toolbar="toolbarItems" allowPaging="true" allowSorting="true" height="100%">
+                <e-grid-editSettings allowAdding="true"></e-grid-editSettings>
+                <e-grid-pageSettings pageSize="10"></e-grid-pageSettings>
+                <e-grid-columns>
+                    <e-grid-column headerText="Action" width="100" commands="columnCommands"></e-grid-column>
+                    <e-grid-column field="ClientId" headerText="Id" textAlign="Center" width="70"></e-grid-column>
+                    <e-grid-column field="ClientName" headerText="Name" width="220"></e-grid-column>
+                    <e-grid-column field="Address" headerText="Assigned" textAlign="Left" width="220"></e-grid-column>
+                    <e-grid-column field="City" headerText="Done?" textAlign="Center" width="150"></e-grid-column>
+                    <e-grid-column field="PostalCode" headerText="Start Date" textAlign="Center" width="150"></e-grid-column>
+                    <e-grid-column field="Phone1" headerText="Predecessors" textAlign="Center" width="150"></e-grid-column>
+                    <e-grid-column field="Phone2" headerText="Due Date" textAlign="Center" width="150"></e-grid-column>
+                    <e-grid-column field="Email1" headerText="Due Date" textAlign="Center" width="150"></e-grid-column>
+                    <e-grid-column field="Email2" headerText="Due Date" textAlign="Center" width="150"></e-grid-column>
+                </e-grid-columns>
+            </ejs-grid>
+        </div>
+    </div>
+</div>
+<script type="text/x-jsrender" id="dateTemplate">
+    ${statusTaskDetail(data)}
+</script>
+<script type="text/x-jsrender" id="dueDateTemplate">
+    ${dueTaskDetail(data)}
+</script>
+<script type="text/x-jsrender" id="statusTemplate">
+    ${statusDetail(data)}
+</script>

@@ -1,4 +1,62 @@
-﻿@{
+﻿@using planner.ViewModel
+@model ProjectVM
+@{
     ViewData["Title"] = "My Project Hub Edit";
 }
-<h1>@ViewBag.Id</h1>
+<div class="container">
+    <div class="row centralContainer p-2 m-2">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10">
+            <form asp-action="ProjectEdit" method="post" class="needs-validation">
+                <div class="container">
+                    <div class="row p-2 text-center">
+                        <h3>EDIT PROJECT</h3>
+                    </div>
+                    <div class="row p-2">
+                        <div class="col-sm-3"><label asp-for="ProjectStatus" class="control-label"></label></div>
+                        <div class="col-sm-3"><input asp-for="ProjectStatus" readonly class="form-control form-control-sm" /></div>
+                        <div class="col-sm-3"><label asp-for="ProjectId" class="control-label"></label></div>
+                        <div class="col-sm-3"><input asp-for="ProjectId" readonly class="form-control form-control-sm" /></div>
+                        <input type="hidden" asp-for="ProjectStatusId" />
+                    </div>
+                    <div class="row p-2">
+                        <div class="col-sm-3"><label asp-for="ProjectName" class="control-label"></label></div>
+                        <div class="col-sm-9"><input asp-for="ProjectName" class="form-control form-control-sm" /></div>
+                        <span asp-validation-for="ProjectDescription" class="text-danger"></span>
+                    </div>
+                    <div class="row p-2">
+                        <div class="col-sm-3"><label asp-for="ProjectDescription" class="control-label"></label></div>
+                        <div class="col-sm-9"><textarea asp-for="ProjectDescription" class="form-control form-control-sm"></textarea></div>
+                        <span asp-validation-for="ProjectDescription" class="text-danger"></span>
+                    </div>
+                    <div class="row p-2">
+                        <div class="col-sm-3"><label asp-for="ClientName" class="control-label"></label></div>
+                        <div class="col-sm-9"><input asp-for="ClientName" class="form-control form-control-sm" readonly /></div>
+                    </div>
+                    <div class="form-group p-2 text-center">
+                        <label class="form-check-label">
+                            <input type="checkbox" asp-for="IsStartProject" class="form-check-input">
+                            Start Project?
+                        </label>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-sm-1"></div>
+    </div>
+    <div class="row centralContainer">
+        <div class="col-sm-12">
+            <div class="container">
+                <div class="row p-2 text-center">
+                    <h4>Project Tasks</h4>
+                </div>
+                <div class="row p-2">
+                    <div class="col-sm-12">
+                        @await Html.PartialAsync("Task/_TaskList", Model.Tasks)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

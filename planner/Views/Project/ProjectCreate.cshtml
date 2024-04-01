@@ -7,11 +7,11 @@
     <div class="row">
         <div class="col-sm-1"></div>
         <div class="col-sm-10 centralContainer">
-            <form asp-action="CreateProject" method="post" class="needs-validation">
+            <form asp-action="ProjectCreate" method="post" class="needs-validation">
                 <input type="hidden" asp-for="ClientId" name="ClientId" />
                 <input type="hidden" asp-for="TeamId" name="ClientId" />
                 <div class="form-group p-2 text-center">
-                    <h3>PROJECT</h3>
+                    <h3>CREATE PROJECT</h3>
                 </div>
 
                 <div class="form-group p-2">
@@ -47,6 +47,9 @@
                     </label>
                 </div>
                 <div class="form-group p-2 text-center">
+                    <span asp-validation-for="ErrorModel" class="text-danger"></span>
+                </div>
+                <div class="form-group p-2 text-center">
                     <button type="submit" class="btn btn-primary">Create Project</button>
                 </div>
             </form>
@@ -60,32 +63,4 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    <script>
-        $(function () {
-            var selected = "";
-            $("#ClientName").autocomplete({
-                source: function (request, response) {
-                    $.ajax({
-                        url: "/Project/GetClientNames",
-                        dataType: "json",
-                        data: { term: request.term },
-                        success: function (data) {
-                            response(data.map(function (item) {
-                                return { label: item.clientName, value: item.clientId };
-                            }));
-                        }
-                    });
-                },
-                minLength: 3,
-                select: function (event, ui) {
-                    selected = ui.item.label;
-                    $("#ClientId").val(ui.item.value);
-                },
-                // New option
-                close: function (event, ui) {
-                    $("#ClientName").val(selected);
-                }
-            });
-        });
-    </script>
 }

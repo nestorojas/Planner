@@ -25,7 +25,9 @@ namespace planner.ViewModel
         [DisplayName("Project Type")]
         public string? WorkflowName { get; set; }
         public List<Workflow> Workflows { get; set; } = [];
+        public List<Task> Tasks { get; set; } = [];
         public int? TeamId { get; set; }
         public bool IsStartProject { get; set; } = false;
+        public string? ErrorModel { get; set; }
     }
 }

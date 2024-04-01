@@ -3,20 +3,20 @@
 @{
     ViewData["Title"] = "My Project Hub Detail";
 }
-
 <div class="container">
-    <div class="row">
+    <div class="row centralContainer p-2 m-2">
         <div class="col-sm-1"></div>
-        <div class="col-sm-10 centralContainer">
+        <div class="col-sm-10">
             <div class="container">
                 <div class="row p-2 text-center">
                     <h3>PROJECT DETAIL</h3>
                 </div>
                 <div class="row p-2">
                     <div class="col-sm-3"><label asp-for="ProjectStatus" class="control-label"></label></div>
-                    <div class="col-sm-3">@Model.ProjectStatus</div>
+                    <div class="col-sm-3"><input asp-for="ProjectStatus" disabled class="form-control form-control-sm" /></div>
                     <div class="col-sm-3"><label asp-for="ProjectId" class="control-label"></label></div>
-                    <div class="col-sm-3">@Model.ProjectId</div>
+                    <div class="col-sm-3"><input asp-for="ProjectId" disabled class="form-control form-control-sm" /></div>
+                    <input type="hidden" asp-for="ProjectStatusId" />
                 </div>
                 <div class="row p-2">
                     <div class="col-sm-3"><label asp-for="ProjectName" class="control-label"></label></div>
@@ -37,5 +37,19 @@
             </div>
         </div>
         <div class="col-sm-1"></div>
+    </div>
+    <div class="row centralContainer">
+        <div class="col-sm-12">
+            <div class="container">
+                <div class="row p-2 text-center">
+                    <h4>Project Tasks</h4>
+                </div>
+                <div class="row p-2">
+                    <div class="col-sm-12">
+                        @await Html.PartialAsync("Task/_TaskList", Model.Tasks)
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
