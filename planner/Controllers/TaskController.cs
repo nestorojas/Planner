@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using planner.Services;
 using planner.ViewModel;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace planner.Controllers
@@ -11,7 +12,20 @@ namespace planner.Controllers
     public class TaskController(UserManager<AppUser> userManager, Planner planner) : Controller
     {
         private readonly Planner _planner = planner;
-
+        public async Task<IActionResult> Task()
+        {
+            var task = await GetTasksForCurrentUserAsync(User);
+            return View(task);
+        }
+        public async Task<List<Task>> GetTasksForCurrentUserAsync(ClaimsPrincipal user)
+        {
+            var currentUser = await userManager.GetUserAsync(user);
+            if (!string.IsNullOrEmpty(currentUser!.UserName))
+            {
+                return _planner.GetTaskByUser(currentUser!.UserName!);
+            }
+            return [];
+        }
         public async Task<IActionResult> TaskCreate(int id)
         {
             var currentUser = await userManager.GetUserAsync(User);

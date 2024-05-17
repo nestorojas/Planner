@@ -1,5 +1,22 @@
-﻿@{
+﻿@using planner
+@model IEnumerable<planner.Task>
+@{
     ViewData["Title"] = "My Project Hub To - Do";
 }
 
-<h3>My To-do List</h3>
+<div class="container">
+    <div class="row centralContainer">
+        <div class="col-sm-12">
+            <div class="container">
+                <div class="row p-2 text-center">
+                    <h4>Project Tasks</h4>
+                </div>
+                <div class="row p-2">
+                    <div class="col-sm-12">
+                        @await Html.PartialAsync("Task/_TaskList", Model)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
