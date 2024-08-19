@@ -32,3 +32,91 @@ body {
 .e-activecolor{
     color : green;
 }
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.container-hub {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+    padding: 20px;
+}
+
+.hero {
+    background: url('https://cdn.b12.io/media/62e23694-1434-11e7-86dc-0242ac110019.apple-desk-office-working-8841.jpg') no-repeat center center/cover;
+    width: 100%;
+    height: 50vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5);
+}
+
+    .hero h1 {
+        font-size: 2.5em;
+        margin: 0;
+    }
+
+.content {
+    margin-top: -100px;
+    background: #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 100%;
+}
+
+    .content h2 {
+        font-size: 2em;
+        margin: 0 0 10px;
+    }
+
+    .content p {
+        font-size: 1.2em;
+        line-height: 1.6;
+        margin: 0 0 20px;
+    }
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn {
+    background: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 1em;
+    transition: background 0.3s;
+}
+
+    .btn:hover {
+        background: #0056b3;
+    }
+
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2em;
+    }
+
+    .content h2 {
+        font-size: 1.5em;
+    }
+
+    .content p {
+        font-size: 1em;
+    }
+}
