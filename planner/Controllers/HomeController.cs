@@ -30,7 +30,7 @@ namespace planner.Controllers
         {
             return View();
         }
-
+        [Authorize]
         public IActionResult Index()
         {
             List<LayoutData> ColumnChartData = new List<LayoutData>
