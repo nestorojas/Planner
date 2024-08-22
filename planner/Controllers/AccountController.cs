@@ -23,7 +23,15 @@ namespace planner.Controllers
 
                 if (result.Succeeded)
                 {
-                    return RedirectToAction("Index", "Home");
+                    var user = await userManager.GetUserAsync(User) ?? new AppUser();
+                    if (user.TeamId > 0)
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                    {
+                        return RedirectToAction("Profile", "Account");
+                    }
                 }
 
                 ModelState.AddModelError("", "Invalid login attempt");
@@ -83,10 +91,10 @@ namespace planner.Controllers
                 CreateTeam = user.TeamId != null && user.TeamId != 0,
                 TeamName = team.Name,
                 TeamOwnerEmail = team.OwnerEmail,
-                IsTeamOwner = user.Email == team.OwnerEmail,
+                IsTeamOwner = user.Email == team.OwnerEmail || user.IsTeamManager,
                 TeamRequestAccess = TeamRequested
             };
-            if(team.OwnerEmail == user.Email)
+            if(team.OwnerEmail == user.Email || user.IsTeamManager)
             {
                 var usersWithTeamId = userManager.Users.Where(u => u.TeamId == model.TeamId).ToList();
                 if(usersWithTeamId.Any())
@@ -95,12 +103,41 @@ namespace planner.Controllers
                     {
                         Email = x.Email,
                         Name = x.Name,
+                        IsTeamOwner = x.Email == team.OwnerEmail,
+                        IsTeamManager = x.IsTeamManager
                     }).ToList();
                 }
 
                 model.TeamAccess = _planner.GetRequestAccess(user.TeamId);
             }
             ModelState.Clear();
+            return View(model);
+        }
+
+        public async Task<IActionResult> TeamAdmin()
+        {
+            List<AppUser> TeamMembers = [];
+            List<TeamsVM> model = [];
+            var user = await userManager.GetUserAsync(User) ?? new AppUser();
+            var team = _planner.GetTeam(user.TeamId) ?? new Team();
+            if (user.TeamId > 0) 
+            {
+                TeamMembers = [.. userManager.Users.Where(u => u.TeamId == user.TeamId)];
+            }
+            if (TeamMembers.Count > 0)
+            {
+                model = (from u in TeamMembers
+                         select new TeamsVM
+                         {
+                             Name = u.Name!,
+                             Email = u.Email!,
+                             TeamId = team.Id,
+                             TeamName = team.Name,
+                             IsTeamManager = u.IsTeamManager,
+                             IsTeamOwner = u.Email == team.OwnerEmail,
+                         }).ToList();
+            }
+            ViewBag.IsTeamManager = user.IsTeamManager;
             return View(model);
         }
         [HttpPost]
@@ -152,11 +189,12 @@ namespace planner.Controllers
             return RedirectToAction("Profile");
         }
         [HttpPost]
-        public async Task<IActionResult> AcceptTeamMemberRequest(int requestId)
+        public async Task<IActionResult> AcceptTeamMemberRequest(int requestId, bool isManager)
         {
             var request = _planner.GetRequestAccessById(requestId);
             var user = await userManager.FindByEmailAsync(request.UserRequestorEmail!) ?? new AppUser();
             user.TeamId = request.TeamId;
+            user.IsTeamManager = isManager;
             await userManager.UpdateAsync(user);
             _planner.UpdateRequestTeamAccess(request);
 

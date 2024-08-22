@@ -1,0 +1,109 @@
+﻿@using planner.ViewModel
+@model IEnumerable<TeamsVM>
+@{
+    ViewData["Title"] = "Teams Admin";
+}
+<div class="container">
+    <div class="row d-flex align-items-center justify-content-center">
+        <div class="col-md-10 card p-3">
+            <h2 class="text-center text-info">Teams Administration</h2>
+            <div class="mb-1">
+                @if (Model != null && Model.Count() > 0)
+                {
+                    <label class="control-label fw-bold">Team Information</label>
+                    <table class="table table-responsive-sm table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Team Name</th>
+                                <th style="text-align:center">Is Team Owner?</th>
+                                <th style="text-align:center">Is Team Manager?</th>
+                                <th style="text-align:center">Remove</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model)
+                            {
+                                <tr>
+                                    <td>@user.Name</td>
+                                    <td>@user.Email</td>
+                                    <td>@user.TeamName</td>
+                                    <td style="text-align:center">
+                                        <input type="radio" name="teamOwner" value="@user.Email" class="team-owner-radio" @(user.IsTeamOwner ? "checked" : "") />
+                                    </td>
+                                    <td style="text-align:center">
+                                        <input type="checkbox" class="team-manager-checkbox" data-email="@user.Email" @(user.IsTeamManager ? "checked" : "") />
+                                    </td>
+                                    <td style="text-align:center">
+                                        @if (ViewBag.IsTeamManager)
+                                        {
+                                            <a href="#" class="remove-link" data-email="@user.Email">
+                                                <i class="bi bi-x-circle-fill text-danger"></i>
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <p>You are not currently part of any team.</p>
+                        <p>To create a new team or request access to an existing one, please visit your profile.</p>
+                        <a class="btn btn-primary" asp-action="Profile" asp-controller="Account">Go to My Profile</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        if ('@ViewBag.IsTeamManager' === "False") {
+            // Disable actions for non-team managers
+            $(".team-owner-radio").prop("disabled", true);
+            $(".team-manager-checkbox").prop("disabled", true);
+            $(".remove-user-btn").prop("disabled", true);
+        }
+        // Update team owner on radio button change
+        $(".team-owner-radio").change(function () {
+            if ($(this).is(':checked')) {
+                var userEmail = $(this).val();
+                $.post("/Team/SwitchOwner", { email: userEmail }).done(function (response) {
+                    alert(response.message);
+                    location.reload();
+                }).fail(function (jqXHR) {
+                    alert(jqXHR.responseText);
+                });
+            }
+        });
+
+        // Update team manager status on checkbox change
+        $(".team-manager-checkbox").change(function () {
+            var userEmail = $(this).data("email");
+            var isManager = $(this).is(':checked');
+            $.post("/Team/ToggleManagerStatus", { email: userEmail, isManager: isManager }).done(function (response) {
+                alert(response.message);
+                location.reload();
+            }).fail(function (jqXHR) {
+                alert(jqXHR.responseText);
+            });
+        });
+
+        // Remove user button functionality
+        $(".remove-user-btn").click(function (e) {
+            e.preventDefault();
+            var userEmail = $(this).data("email");
+            $.post("/Team/RemoveUser", { email: userEmail }).done(function (response) {
+                alert(response.message);
+                location.reload();
+            }).fail(function (jqXHR) {
+                alert(jqXHR.responseText);
+            });
+        });
+    });
+</script>

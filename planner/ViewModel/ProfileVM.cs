@@ -24,5 +24,7 @@ namespace planner.ViewModel
     {
         public string? Email { get; set; }
         public string? Name { get; set; }
+        public bool IsTeamOwner { get; set; }
+        public bool IsTeamManager { get; set; }
     }
 }

@@ -9,5 +9,6 @@ namespace planner
         public string? Name { get; set; }
         public string? Address { get; set; }
         public int? TeamId { get; set; }
+        public bool IsTeamManager { get; set; }
     }
 }

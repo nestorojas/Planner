@@ -5,7 +5,7 @@
 }
 
 <div class="row d-flex align-items-center justify-content-center">
-    <div class="col-md-4 card p-3">
+    <div class="col-md-8 card p-3">
         <h2 class="text-center text-info">Profile</h2>
         <form method="post">
             <input type="hidden" asp-for="TeamId" />
@@ -22,13 +22,16 @@
                 <label asp-for="Email" class="control-label"></label>
                 <input asp-for="Email" class="form-control" readonly />
             </div>
+            <br />
             <div class="mb-1">
                 @if (Model.TeamAccess != null && Model.TeamAccess.Count > 0)
                 {
+                    <label class="control-label fw-bold">Users request to join the team</label>
                     <table class="table table-responsive-sm">
                         <thead>
                             <tr>
                                 <th>Email Requestor</th>
+                                <th>Is Manager</th>
                                 <th>Approve</th>
                                 <th>Reject</th>
                             </tr>
@@ -38,8 +41,11 @@
                             {
                                 <tr>
                                     <td>@request.UserRequestorEmail</td>
-                                    <td><a href="#" class="approve-link" data-request-id="@request.Id"><i class="bi bi-check-circle-fill text-success"></i></a></td>
-                                    <td><a href="#" class="reject-link" data-request-id="@request.Id"><i class="bi bi-x-circle-fill text-danger"></i></a></td>
+                                    <td style="text-align:center">
+                                        <input type="checkbox" class="manager-checkbox" data-request-id="@request.Id" />
+                                    </td>
+                                    <td style="text-align:center"><a href="#" class="approve-link" data-request-id="@request.Id"><i class="bi bi-check-circle-fill text-success"></i></a></td>
+                                    <td style="text-align:center"><a href="#" class="reject-link" data-request-id="@request.Id"><i class="bi bi-x-circle-fill text-danger"></i></a></td>
                                 </tr>
                             }
                         </tbody>
@@ -54,12 +60,15 @@
                 </div>
                 if (Model.IsTeamOwner && Model.TeamMembers != null && Model.TeamMembers.Count > 0)
                 {
+                    <br />
                     <div class="mb-1">
+                        <label class="control-label fw-bold">Team Members</label>
                         <table class="table table-responsive">
                             <thead>
                                 <tr>
                                     <th>Email</th>
                                     <th>Name</th>
+                                    <th>Is Manager?</th>
                                     <th>Remove</th>
                                 </tr>
                             </thead>
@@ -69,7 +78,13 @@
                                     <tr>
                                         <td>@team.Email</td>
                                         <td>@team.Name</td>
-                                        <td><a href="#" class="remove-link" data-request-id="@team.Email"><i class="bi bi-x-circle-fill text-danger"></i></a></td>
+                                        <td>@(team.IsTeamManager ? "Yes" : "No")</td>
+                                        <td style="text-align:center">
+                                            @if (!team.IsTeamOwner)
+                                            {
+                                                <a href="#" class="remove-link" data-request-id="@team.Email"><i class="bi bi-x-circle-fill text-danger"></i></a>
+                                            }
+                                            </td>
                                     </tr>
                                 }
                             </tbody>
@@ -141,7 +156,7 @@
             var teamNameInput = document.getElementById('TeamName');
 
             function handleCheckboxChange() {
-                if (createTeamCheck.checked) {
+                if (createTeamCheck && createTeamCheck.checked) {
                     joinTeamCheck.checked = false;
                     teamNameInput.required = true;
                     teamOwnerEmailInput.required = false;
@@ -150,7 +165,7 @@
                     document.getElementById("requestTeam").value = 'Create Team';
                 }
 
-                if (joinTeamCheck.checked) {
+                if (joinTeamCheck && joinTeamCheck.checked) {
                     createTeamCheck.checked = false;
                     teamOwnerEmailInput.required = true;
                     teamNameInput.required = false;
@@ -159,9 +174,8 @@
                     document.getElementById("requestTeam").value = 'Request Access';
                 }
             }
-
-            createTeamCheck.addEventListener('change', handleCheckboxChange);
-            joinTeamCheck.addEventListener('change', handleCheckboxChange);
+            if (createTeamCheck) createTeamCheck.addEventListener('change', handleCheckboxChange);
+            if (joinTeamCheck) joinTeamCheck.addEventListener('change', handleCheckboxChange);
 
             // Initialize the state
             handleCheckboxChange();
@@ -171,7 +185,10 @@
             $(".approve-link").click(function (e) {
                 e.preventDefault();
                 var requestId = $(this).data("request-id");
-                $.post("/Account/AcceptTeamMemberRequest", { requestId: requestId }).done(function () { location.reload(); });
+                var isManager = $(`.manager-checkbox[data-request-id="${requestId}"]`).is(':checked');
+                $.post("/Account/AcceptTeamMemberRequest", { requestId: requestId, isManager: isManager }).done(function () {
+                    location.reload();
+                });
             });
 
             $(".reject-link").click(function (e) {
