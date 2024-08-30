@@ -224,5 +224,56 @@ namespace planner.Controllers
             await userManager.UpdateAsync(user);
             return RedirectToAction("Profile");
         }
+        [HttpPost]
+        public async Task<IActionResult> SwitchTeamOwner(string email)
+        {
+            bool result = true;
+            try
+            {
+                var user = await userManager.FindByEmailAsync(email!) ?? new AppUser();
+                var team = _planner.GetTeam(user.TeamId) ?? new Team();
+                user.IsTeamManager = true;
+                team.OwnerEmail = email;
+                _planner.UpdateTeam(team);
+                await userManager.UpdateAsync(user);
+            }
+            catch
+            {
+                result = false;
+            }
+            return Json(result);
+        }
+        [HttpPost]
+        public async Task<IActionResult> ToggleManagerStatus(string email, bool isManager)
+        {
+            bool result = true;
+            try
+            {
+                var user = await userManager.FindByEmailAsync(email!) ?? new AppUser();
+                user.IsTeamManager = isManager;
+                await userManager.UpdateAsync(user);
+            }
+            catch
+            {
+                result = false;
+            }
+            return Json(result);
+        }
+        [HttpPost]
+        public async Task<IActionResult> RemoveUserfromTeam(string email)
+        {
+            bool result = true;
+            try
+            {
+                var user = await userManager.FindByEmailAsync(email) ?? new AppUser();
+                user.TeamId = 0;
+                await userManager.UpdateAsync(user);
+            }
+            catch
+            {
+                result = false;
+            }
+            return Json(result);
+        }
     }
 }

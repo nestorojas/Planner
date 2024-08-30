@@ -11,5 +11,6 @@ namespace planner
         public bool IsActive { get; set; }
         public string CreatedByUserId { get; set; } = string.Empty;
         public string? OwnerId { get; set; }
+        public int TeamId { get; set; }
     }
 }

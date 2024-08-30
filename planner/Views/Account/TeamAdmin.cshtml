@@ -6,17 +6,16 @@
 <div class="container">
     <div class="row d-flex align-items-center justify-content-center">
         <div class="col-md-10 card p-3">
-            <h2 class="text-center text-info">Teams Administration</h2>
+            <h2 class="text-center">My Team</h2>
             <div class="mb-1">
                 @if (Model != null && Model.Count() > 0)
                 {
-                    <label class="control-label fw-bold">Team Information</label>
+                    <h3 class="control-label fw-bold"> @Model.FirstOrDefault()!.TeamName</h3>
                     <table class="table table-responsive-sm table-striped">
                         <thead>
                             <tr>
                                 <th>Name</th>
                                 <th>Email</th>
-                                <th>Team Name</th>
                                 <th style="text-align:center">Is Team Owner?</th>
                                 <th style="text-align:center">Is Team Manager?</th>
                                 <th style="text-align:center">Remove</th>
@@ -28,7 +27,6 @@
                                 <tr>
                                     <td>@user.Name</td>
                                     <td>@user.Email</td>
-                                    <td>@user.TeamName</td>
                                     <td style="text-align:center">
                                         <input type="radio" name="teamOwner" value="@user.Email" class="team-owner-radio" @(user.IsTeamOwner ? "checked" : "") />
                                     </td>
@@ -38,7 +36,7 @@
                                     <td style="text-align:center">
                                         @if (ViewBag.IsTeamManager)
                                         {
-                                            <a href="#" class="remove-link" data-email="@user.Email">
+                                            <a href="#" class="remove-user-btn" data-email="@user.Email">
                                                 <i class="bi bi-x-circle-fill text-danger"></i>
                                             </a>
                                         }
@@ -73,8 +71,9 @@
         $(".team-owner-radio").change(function () {
             if ($(this).is(':checked')) {
                 var userEmail = $(this).val();
-                $.post("/Team/SwitchOwner", { email: userEmail }).done(function (response) {
-                    alert(response.message);
+                $.post("/Account/SwitchTeamOwner", { email: userEmail })
+                .done(function (response) {
+                    alert("User : " + userEmail + " has been changed to Manager and is now Team Owner");
                     location.reload();
                 }).fail(function (jqXHR) {
                     alert(jqXHR.responseText);
@@ -86,8 +85,9 @@
         $(".team-manager-checkbox").change(function () {
             var userEmail = $(this).data("email");
             var isManager = $(this).is(':checked');
-            $.post("/Team/ToggleManagerStatus", { email: userEmail, isManager: isManager }).done(function (response) {
-                alert(response.message);
+            var responsetext = isManager == true ? " has been added as a Team Manager": " is no longer a Team Manager"; 
+            $.post("/Account/ToggleManagerStatus", { email: userEmail, isManager: isManager }).done(function (response) {
+                alert("User : " + userEmail + responsetext);
                 location.reload();
             }).fail(function (jqXHR) {
                 alert(jqXHR.responseText);
@@ -98,8 +98,8 @@
         $(".remove-user-btn").click(function (e) {
             e.preventDefault();
             var userEmail = $(this).data("email");
-            $.post("/Team/RemoveUser", { email: userEmail }).done(function (response) {
-                alert(response.message);
+            $.post("/Account/RemoveUserfromTeam", { email: userEmail }).done(function (response) {
+                alert("User : " + userEmail + " is not longer part of the Team");
                 location.reload();
             }).fail(function (jqXHR) {
                 alert(jqXHR.responseText);

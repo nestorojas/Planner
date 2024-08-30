@@ -6,18 +6,18 @@
 }
 
 <div class="row d-flex align-items-center justify-content-center">
-    <div class="col-md-3 card p-3">
-        <h2 class="text-center text-info">Login</h2>
+    <div class="col-sm-6 card p-3">
+        <h2 class="text-center">Login</h2>
         <form asp-action="Login" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="mb-1">
-                <label asp-for="Username" class="control-label"></label>
-                <input asp-for="Username" class="form-control" />
+            <div class="form-floating mb-3">
+                <input type="email" class="form-control" asp-for="Username" placeholder="name@example.com">
+                <label for="Username">Email address</label>
                 <span asp-validation-for="Username" class="text-danger"></span>
             </div>
-            <div class="mb-1">
-                <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" />
+            <div class="form-floating mb-1">
+                <input type="password" class="form-control" asp-for="Password" placeholder="Password">
+                <label for="Password">Password</label>
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="mb-1 form-check">
@@ -32,7 +32,7 @@
                 <div class="col-4">
                     <input type="submit" value="Login" class="btn btn-primary btn-sm float-end" />
                 </div>
-            </div>
+            </div>           
         </form>
     </div>
 </div>
