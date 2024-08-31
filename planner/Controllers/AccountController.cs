@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using planner.Services;
 using planner.ViewModel;
+using System.Xml.Linq;
 
 
 namespace planner.Controllers
@@ -53,13 +54,24 @@ namespace planner.Controllers
                     Name = model.Name,
                     UserName = model.Email,
                     Email = model.Email,
-                    Address = model.Address
+                    Address = model.Address,
+                    IsTeamManager = true
                 };
 
                 var result = await userManager.CreateAsync(user, model.Password!);
 
                 if (result.Succeeded)
                 {
+                    var team = new Team
+                    {
+                        Name = user.Name!,
+                        OwnerEmail = user!.Email!
+                    };
+                    _planner.AddTeam(team);
+                    user.TeamId = team.Id;
+
+                    await userManager.UpdateAsync(user);
+
                     await signInManager.SignInAsync(user, false);
 
                     return RedirectToAction("Index", "Home");
@@ -87,8 +99,8 @@ namespace planner.Controllers
             {
                 Name = user.Name,
                 Email = user.Email,
-                TeamId = user.TeamId ?? 0,
-                CreateTeam = user.TeamId != null && user.TeamId != 0,
+                TeamId = user.TeamId,
+                CreateTeam = user.TeamId != 0,
                 TeamName = team.Name,
                 TeamOwnerEmail = team.OwnerEmail,
                 IsTeamOwner = user.Email == team.OwnerEmail || user.IsTeamManager,
@@ -159,7 +171,7 @@ namespace planner.Controllers
             else
             {
                 var user = await userManager.FindByEmailAsync(model.TeamOwnerEmail!) ?? new AppUser();
-                if (user!.TeamId == null)
+                if (user!.TeamId == 0)
                 {
                     model.CreateTeam = true;
                     ViewBag.ModelError = "Team not found review: Team Admin Email";
@@ -176,17 +188,11 @@ namespace planner.Controllers
                         UserRequestorEmail = model.Email!,
                     };
                     _planner.RequestTeamAccess(requestor);
+                    user.IsTeamManager = false;
+                    await userManager.UpdateAsync(user);
                     return RedirectToAction("Profile");
                 }              
             }
-        }
-        [HttpPost]
-        public async Task<IActionResult> ExitAccess(ProfileVM model)
-        {
-            var user = await userManager.FindByEmailAsync(model.Email!) ?? new AppUser();
-            user.TeamId = 0;
-            await userManager.UpdateAsync(user);
-            return RedirectToAction("Profile");
         }
         [HttpPost]
         public async Task<IActionResult> AcceptTeamMemberRequest(int requestId, bool isManager)
@@ -211,17 +217,13 @@ namespace planner.Controllers
         [HttpPost]
         public async Task<IActionResult> RemoveTeamMemberRequest(string email)
         {
-            var user = await userManager.FindByEmailAsync(email!) ?? new AppUser();
-            user.TeamId = 0;
-            await userManager.UpdateAsync(user);
-            return RedirectToAction("Profile");
-        }
-        [HttpPost]
-        public async Task<IActionResult> ExitTeam(ProfileVM model)
-        {
-            var user = await userManager.FindByEmailAsync(model.Email!) ?? new AppUser();
-            user.TeamId = 0;
-            await userManager.UpdateAsync(user);
+            try
+            {
+                await RemoveUserFromTeam(email);
+            }
+            catch
+            {
+            }
             return RedirectToAction("Profile");
         }
         [HttpPost]
@@ -260,20 +262,46 @@ namespace planner.Controllers
             return Json(result);
         }
         [HttpPost]
-        public async Task<IActionResult> RemoveUserfromTeam(string email)
+        public async Task<IActionResult> RemoveTeamUser(string Email)
+        {
+            return Json(await RemoveUserFromTeam(Email));
+        }
+        private async Task<bool> RemoveUserFromTeam(string Email)
         {
             bool result = true;
             try
             {
-                var user = await userManager.FindByEmailAsync(email) ?? new AppUser();
-                user.TeamId = 0;
-                await userManager.UpdateAsync(user);
+                var user = await userManager.FindByEmailAsync(Email);
+                if (user != null)
+                {
+                    var TeamAction = _planner.GetTeam(user.TeamId);
+                    if (TeamAction != null)
+                    {
+                        if (TeamAction.OwnerEmail == user.Email)
+                        {
+                            result = false;
+                        }
+                        else
+                        {
+                            var UserTeam = _planner.GetTeamByOwner(user.Name!);
+                            user.TeamId = 0;
+                            if(UserTeam != null)
+                                user.TeamId = UserTeam.Id;
+                            await userManager.UpdateAsync(user);
+                        }
+                    }
+                    else
+                    {
+                        result = false;
+                    }
+
+                }
             }
             catch
             {
                 result = false;
             }
-            return Json(result);
+            return result;
         }
     }
 }

@@ -98,7 +98,7 @@
                         <div class="row text-center">
                             <div class="col-sm-4"></div>
                             <div class="col-4">
-                                <input type="submit" id="exitTeam" asp-action="ExitTeam" value="Exit Team" class="btn btn-primary btn-sm float-end" />
+                                <input type="submit" id="exitTeam" asp-action="RemoveTeamUser" value="Exit Team" class="btn btn-primary btn-sm float-end" />
                             </div>
                         </div>
                     }
@@ -200,7 +200,7 @@
             $(".remove-link").click(function (e) {
                 e.preventDefault();
                 var email = $(this).data("request-id");
-                $.post("/Account/RemoveTeamMemberRequest", { email: email }).done(function () { location.reload(); });
+                $.post("/Account/RemoveTeamUser", { email: email }).done(function () { location.reload(); });
             });
         });
     </script>

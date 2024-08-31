@@ -240,6 +240,10 @@ namespace planner.Services
         internal Team GetTeam(int? id)
         {
             return _context.Teams.Where(x => x.Id == id).FirstOrDefault()!;
+       }
+        internal Team GetTeamByOwner(string owner)
+        {
+            return _context.Teams.Where(x => x.Name == owner).FirstOrDefault()!;
         }
         internal void AddTeam(Team team)
         {

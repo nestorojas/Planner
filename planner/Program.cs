@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using planner;
@@ -9,7 +10,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("DbConnection")));
+builder.Services.AddDbContextPool<ApplicationDbContext>(options =>
+{
+    options.UseSqlite(builder.Configuration.GetConnectionString("DbConnection") +
+                      ";Default Timeout=30;");
+    options.EnableSensitiveDataLogging();
+});
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(
     options =>
@@ -20,6 +26,23 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(
         options.Password.RequireNonAlphanumeric = false;
         options.Password.RequireLowercase = false;
     }).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        // Set the cookie expiration time
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+
+        // Enable or disable sliding expiration (refresh the expiration time on each request)
+        options.SlidingExpiration = false;
+
+        // Set the login path
+        options.LoginPath = "/Account/Login";
+
+        // Ensure the cookie expires when the browser is closed
+        options.Cookie.IsEssential = true;
+        options.Cookie.HttpOnly = true;
+    });
 
 builder.Services.AddScoped<Planner>();
 

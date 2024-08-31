@@ -98,12 +98,23 @@
         $(".remove-user-btn").click(function (e) {
             e.preventDefault();
             var userEmail = $(this).data("email");
-            $.post("/Account/RemoveUserfromTeam", { email: userEmail }).done(function (response) {
-                alert("User : " + userEmail + " is not longer part of the Team");
-                location.reload();
-            }).fail(function (jqXHR) {
-                alert(jqXHR.responseText);
-            });
+            $.post("/Account/RemoveTeamUser", 
+            { Email: userEmail }
+            )
+            .done(
+                function (response) {
+                    if(response){
+                        alert("User : " + userEmail + " is not longer part of the Team");
+                    }
+                    else{
+                        alert("User : " + userEmail + " cannot be removed from the Team");
+                    }
+                    location.reload();
+                })
+                .fail(
+                    function (jqXHR) {
+                        alert(jqXHR.responseText);
+                    });
         });
     });
 </script>
